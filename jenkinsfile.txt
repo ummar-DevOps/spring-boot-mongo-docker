@@ -1,7 +1,4 @@
 pipeline {
-	environment {
-     buildnumber = BUILD_NUMBER
-   }
 	agent any
 	tools {
 		maven "maven3.6.3"
@@ -19,17 +16,17 @@ pipeline {
 		}
 		stage ('docker build') {
 			steps {
-				sh "docker build -t ummardocker/spring-boot-mongo:${buildnumber} ."
+				sh "docker build -t ummardocker/spring-boot-mongo:${env.BUILD_NUMBER} ."
 			}
 		}
 		stage ('image push') {
 			steps {
-				sh "docker push ummardocker/spring-boot-mongo:${buildnumber}"
+				sh "docker push ummardocker/spring-boot-mongo:${env.BUILD_NUMBER}"
 			}
 		}
 		stage ('update compose file') {
 			steps {
-				sh "sed -i '/#buildnumber/c ${buildnumber}' docker-compose.yml"
+				sh "sed -i '/#buildnumber/c ${env.BUILD_NUMBER}' docker-compose.yml"
 			}
 		}
 		stage ('copy compose file to deploy server') {
