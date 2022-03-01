@@ -1,0 +1,55 @@
+pipeline {
+	environment {
+     buildnumber = BUILD_NUMBER
+   }
+	agent any
+	tools {
+		maven "maven3.6.3"
+	}
+	stages {
+		stage ('checkoutcode') {
+			steps {
+			git credentialsId: '8707530d-7105-4261-8e79-46d0972584d0', url: 'https://github.com/MithunTechnologiesDevOps/spring-boot-mongo-docker.git'
+			}
+		}
+		stage ('build') {
+			steps {
+				sh "mvn clean package"
+			}
+		}
+		stage ('docker build') {
+			steps {
+				sh "docker build -t ummardocker/spring-boot-mongo:${buildnumber} ."
+			}
+		}
+		stage ('image push') {
+			steps {
+				sh "docker push ummardocker/spring-boot-mongo:${buildnumber}"
+			}
+		}
+		stage ('update compose file') {
+			steps {
+				sh "sed -i '/#buildnumber/c ${buildnumber}' docker-compose.yml"
+			}
+		}
+		stage ('copy compose file to deploy server') {
+			steps {
+				sshagent(['ac294317-19fa-4823-84d0-3da08f47ad1e']) {
+				sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@65.0.20.52:/home/ubuntu/"
+				}
+			}
+		}
+		stage ('swith to docker deploy server') {
+			steps {
+				sshagent(['ac294317-19fa-4823-84d0-3da08f47ad1e']) {
+				sh "ssh -o StrictHostKeyChecking=no ubuntu@65.0.20.52"
+				}
+			}
+		}
+		stage ('excute compse file') {
+			steps {
+				sh "docker-compose up -d"
+			}
+		}
+	}
+}
