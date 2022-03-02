@@ -32,14 +32,14 @@ pipeline {
 		stage ('copy compose file to deploy server') {
 			steps {
 				sshagent(['ac294317-19fa-4823-84d0-3da08f47ad1e']) {
-				sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@65.0.20.52:/home/ubuntu/"
+				sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@3.110.42.87:/home/ubuntu/"
 				}
 			}
 		}
 		stage ('swith to docker deploy server') {
 			steps {
 				sshagent(['ac294317-19fa-4823-84d0-3da08f47ad1e']) {
-				sh "ssh -o StrictHostKeyChecking=no ubuntu@65.0.20.52"
+				sh "ssh -o StrictHostKeyChecking=no ubuntu@3.110.42.87"
 				}
 			}
 		}
